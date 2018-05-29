@@ -6,6 +6,8 @@ package it.polito.tdp.artsmia;
 
 import java.net.URL;
 import java.util.ResourceBundle;
+
+import it.polito.tdp.artsmia.model.Model;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -14,6 +16,8 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 
 public class ArtsmiaController {
+	
+	private Model m;
 
 	@FXML // ResourceBundle that was given to the FXMLLoader
 	private ResourceBundle resources;
@@ -41,12 +45,43 @@ public class ArtsmiaController {
 
 	@FXML
 	void doAnalizzaOggetti(ActionEvent event) {
-		txtResult.setText("doAnalizzaOggetti");
+		
+		m.creaGrafo();
+		
+		txtResult.setText(String.format("grafo creato: %d vertici, %s archi\n", m.getNumeVert(),m.getNumEdg()));
+		
 	}
 
 	@FXML
 	void doCalcolaComponenteConnessa(ActionEvent event) {
-		txtResult.setText("doCalcolaComponenteConnessa");
+		
+		String idObj = txtObjectId.getText();
+		
+		int id;
+		
+		try { //il numero inserito potrebbe non essere riconosciuto come intero e scatenare un'eccezione
+			
+			id = Integer.parseInt(idObj);
+		}
+		catch ( NumberFormatException e) {
+			
+			txtResult.setText("inserire un numero valido");
+			
+			return ;
+		}
+		
+		if(!m.idIsValid(id)) { //verifico che il numero sia presente nel DB
+			
+			txtResult.setText(String.format("non esiste alcun oggetto con id =%d", id));
+		
+			return;
+		}
+		
+		int dimensioneCompConnessa = m.calcolaDimensioneCC(id);
+		
+		txtResult.setText(String.format("la componente connessa che contiene il vertice %d contiene %d vertici", id,dimensioneCompConnessa));
+
+		
 	}
 
 	@FXML
@@ -64,4 +99,12 @@ public class ArtsmiaController {
 		assert txtResult != null : "fx:id=\"txtResult\" was not injected: check your FXML file 'Artsmia.fxml'.";
 
 	}
+
+	
+	public void setModel(Model model) {
+		m = model;
+	}
+	
+	
+	
 }
